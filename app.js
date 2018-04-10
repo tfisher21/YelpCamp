@@ -34,6 +34,10 @@ app.get("/", function(req, res){
    res.render("landing");
 });
 
+////////////////////////
+// Campgrounds Routes //
+////////////////////////
+
 // INDEX - Show all campgrounds
 app.get("/campgrounds", function(req, res){
     // Get all campgrounds from DB
@@ -69,7 +73,7 @@ app.get("/campgrounds/new", function(req, res){
    res.render("campgrounds/new"); 
 });
 
-// SHOW - 
+// SHOW - Show specified campground
 app.get("/campgrounds/:id", function(req, res){
   // Find the campground with provided ID
   Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground){
@@ -87,6 +91,7 @@ app.get("/campgrounds/:id", function(req, res){
 // Comments Routes //
 /////////////////////
 
+// NEW - Show form to create new comment
 app.get("/campgrounds/:id/comments/new", function(req, res){
   // Find Campground by id
   Campground.findById(req.params.id, function(err, campground) {
@@ -98,6 +103,7 @@ app.get("/campgrounds/:id/comments/new", function(req, res){
   });
 });
 
+// CREATE - Add new comment to database
 app.post("/campgrounds/:id/comments", function(req, res){
   // Lookup Campground using ID
   Campground.findById(req.params.id, function(err, campground){
@@ -144,6 +150,19 @@ app.post("/register", function(req, res){
       res.redirect("/campgrounds");
     });
   });
+});
+
+// Show Login Form
+app.get("/login", function(req, res){
+  res.render("login");
+});
+
+// Handle Login Logic
+app.post("/login", passport.authenticate("local", 
+  {
+    successRedirect: "/campgrounds",
+    failureRedirect: "/login"
+  }), function(req, res){
 });
 
 
