@@ -59,6 +59,31 @@ router.get("/:id", function(req, res){
   });
 });
 
+// EDIT - Show edit form for specified campground
+router.get("/:id/edit", function(req, res){
+  Campground.findById(req.params.id, function(err, foundCampground){
+    if (err) {
+      console.log(err);
+      res.redirect("/campgrounds")
+    } else {
+      res.render("campgrounds/edit", {campground: foundCampground});
+    }
+  });
+});
+
+// UPDATE - Update specified campground
+router.put("/:id", function(req, res){
+  // find and update campground
+  Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground){
+    if (err) {
+      console.log(err);
+      res.redirect("/campgrounds");
+    } else {
+      res.redirect("/campgrounds/" + req.params.id);
+    }
+  });
+});
+
 ////////////////
 // Middleware //
 ////////////////
