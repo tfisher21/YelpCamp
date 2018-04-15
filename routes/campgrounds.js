@@ -62,12 +62,16 @@ router.get("/:id", function(req, res){
 // EDIT - Show edit form for specified campground
 router.get("/:id/edit", checkCampgroundOwnership, function(req, res){
   Campground.findById(req.params.id, function(err, foundCampground){
-    res.render("campgrounds/edit", {campground: foundCampground});
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("campgrounds/edit", {campground: foundCampground});
+    }
   });
 });
 
 // UPDATE - Update specified campground
-router.put("/:id", function(req, res){
+router.put("/:id", checkCampgroundOwnership, function(req, res){
   // find and update campground
   Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground){
     if (err) {
@@ -80,7 +84,7 @@ router.put("/:id", function(req, res){
 });
 
 // DESTROY - Delete specified campground
-router.delete("/:id", function(req, res){
+router.delete("/:id", checkCampgroundOwnership, function(req, res){
   Campground.findByIdAndRemove(req.params.id, function(err){
     if (err) {
       console.log(err);
