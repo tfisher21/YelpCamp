@@ -111,11 +111,11 @@ function checkCampgroundOwnership(req, res, next) {
     Campground.findById(req.params.id, function(err, foundCampground){
       if (err) {
         console.log(err);
-        res.redirect("/campgrounds")
+        res.redirect("/campgrounds");
       } else {
         // Does User hold campground
         if (foundCampground.author.id.equals(req.user._id)) {
-          next
+          next();
         } else {
           res.send("You do not have permission to do that!");
         }

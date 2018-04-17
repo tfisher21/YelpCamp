@@ -50,7 +50,7 @@ router.post("/", function(req, res){
 });
 
 // EDIT - Show form to edit a comment
-router.get("/:comment_id/edit", function(req, res){
+router.get("/:comment_id/edit", checkCommentOwnership, function(req, res){
   Comment.findById(req.params.comment_id, function(err, foundComment){
     if (err) {
       console.log(err);
@@ -74,7 +74,7 @@ router.put("/:comment_id", function(req, res){
 });
 
 // DESTROY - Delete specified comment
-router.delete("/:comment_id", function(req, res){
+router.delete("/:comment_id", checkCommentOwnership, function(req, res){
   Comment.findByIdAndRemove(req.params.comment_id, function(err){
     if (err) {
       res.redirect("back");
@@ -83,6 +83,7 @@ router.delete("/:comment_id", function(req, res){
     }
   });
 });
+
 ////////////////
 // Middleware //
 ////////////////
@@ -94,4 +95,26 @@ function isLoggedIn(req, res, next){
   res.redirect("/login");
 }
 
+function checkCommentOwnership(req, res, next) {
+  if (req.isAuthenticated()) {
+    Comment.findById(req.params.comment_id, function(err, foundComment){
+      if (err) {
+        console.log(err);
+        res.redirect("/campgrounds");
+      } else {
+        // Does User hold campground
+        if (foundComment.author.id.equals(req.user._id)) {
+          next();
+        } else {
+          res.send("You do not have permission to do that!");
+        }
+      }
+    });
+  } else {
+    console.log("You must be logged in to do that!");
+    res.redirect("back");
+  }
+}
+
+/////////////////////////
 module.exports = router;
