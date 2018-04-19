@@ -1,14 +1,15 @@
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var Campground = require("../models/campground");
-var Comment = require("../models/comment");
+var express     = require("express"),
+    router      = express.Router({mergeParams: true}),
+    Campground  = require("../models/campground"),
+    Comment     = require("../models/comment"),
+    middleware  = require("../middleware");
 
 /////////////////////
 // Comments Routes //
 /////////////////////
 
 // NEW - Show form to create new comment
-router.get("/new", isLoggedIn, function(req, res){
+router.get("/new", middleware.isLoggedIn, function(req, res){
   // Find Campground by id
   Campground.findById(req.params.id, function(err, campground) {
     if (err) {
@@ -50,7 +51,7 @@ router.post("/", function(req, res){
 });
 
 // EDIT - Show form to edit a comment
-router.get("/:comment_id/edit", checkCommentOwnership, function(req, res){
+router.get("/:comment_id/edit", middleware.checkCommentOwnership, function(req, res){
   Comment.findById(req.params.comment_id, function(err, foundComment){
     if (err) {
       console.log(err);
@@ -74,7 +75,7 @@ router.put("/:comment_id", function(req, res){
 });
 
 // DESTROY - Delete specified comment
-router.delete("/:comment_id", checkCommentOwnership, function(req, res){
+router.delete("/:comment_id", middleware.checkCommentOwnership, function(req, res){
   Comment.findByIdAndRemove(req.params.comment_id, function(err){
     if (err) {
       res.redirect("back");
@@ -83,38 +84,6 @@ router.delete("/:comment_id", checkCommentOwnership, function(req, res){
     }
   });
 });
-
-////////////////
-// Middleware //
-////////////////
-
-function isLoggedIn(req, res, next){
-  if(req.isAuthenticated()){
-      return next();
-  }
-  res.redirect("/login");
-}
-
-function checkCommentOwnership(req, res, next) {
-  if (req.isAuthenticated()) {
-    Comment.findById(req.params.comment_id, function(err, foundComment){
-      if (err) {
-        console.log(err);
-        res.redirect("/campgrounds");
-      } else {
-        // Does User hold campground
-        if (foundComment.author.id.equals(req.user._id)) {
-          next();
-        } else {
-          res.send("You do not have permission to do that!");
-        }
-      }
-    });
-  } else {
-    console.log("You must be logged in to do that!");
-    res.redirect("back");
-  }
-}
 
 /////////////////////////
 module.exports = router;
